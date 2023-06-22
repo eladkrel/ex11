@@ -45,7 +45,7 @@ def find_length_n_paths(n: int, board: Board, words: Iterable[str]) -> List[Path
         for di in [-1, 0, 1]:
             for dj in [-1, 0, 1]:
                 ni, nj = i + di, j + dj
-                if ni >= 0 and ni < len(board)-1 and nj >= 0 and nj < len(board[0])-1:
+                if ni >= 0 and ni < len(board) and nj >= 0 and nj < len(board[0]):
                     next_word = word + board[ni][nj]
                     dfs(ni, nj, path, visited, next_word, result)
 
@@ -57,8 +57,8 @@ def find_length_n_paths(n: int, board: Board, words: Iterable[str]) -> List[Path
     result = []
     visited = [[False] * n for _ in range(n)]
 
-    for i in range(len(board)-1):
-        for j in range(len(board[0])-1):
+    for i in range(len(board)):
+        for j in range(len(board[0])):
             word = board[i][j]  # Start a new word from each cell
             dfs(i, j, [], visited, word, result)
 
