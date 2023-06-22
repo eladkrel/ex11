@@ -4,26 +4,38 @@ import boggle_board_randomizer
 
 Board = List[List[str]]
 Path = List[Tuple[int, int]]
+Coordinate = Tuple[int, int]
 
 
 def is_valid_path(board: Board, path: Path, words: Iterable[str]) -> Optional[str]:
     word = ""
     for i in range(len(path)):
-        cur_coordinate = path[i]
-        y = cur_coordinate[0]
-        x = cur_coordinate[1]
-        if y > len(board)-1 or y < 0 or \
-                x > len(board[0]) or x < 0:
+        curr_coordinate = path[i]
+        if is_out_of_bounds(board, curr_coordinate):
             return None
         if i < len(path)-1:
-            next_coordinate = path[i+1]
-            next_y = next_coordinate[0]
-            next_x = next_coordinate[1]
-            if abs(y-next_y) > 1 or abs(x-next_x) > 1:
+            next_coordinate = path[i + 1]
+            if not is_valid_distance(curr_coordinate, next_coordinate):
                 return None
-        word += board[y][x]
+        word += board[curr_coordinate[0]][curr_coordinate[1]]
     if word in words:
         return word
+
+
+def is_out_of_bounds(board: Board, curr_coordinate: Coordinate) -> bool:
+    y, x = curr_coordinate
+    if y > len(board) - 1 or y < 0 or \
+            x > len(board[0]) or x < 0:
+        return True
+    return False
+
+
+def is_valid_distance(curr_coordinate: Coordinate, next_coordinate: Coordinate) -> bool:
+    curr_y, curr_x = curr_coordinate
+    next_y, next_x = next_coordinate
+    if abs(curr_y - next_y) > 1 or abs(curr_x - next_x) > 1:
+        return False
+    return True
 
 
 def find_length_n_paths(n: int, board: Board, words: Iterable[str]) -> List[Path]:
