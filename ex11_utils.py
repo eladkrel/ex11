@@ -42,7 +42,7 @@ def find_length_n_paths(n: int, board: Board, words: Iterable[str]) -> List[Path
     # Inner function for depth-first search (DFS) traversal
     def dfs(i: int, j: int, path: Path, visited: List[List[bool]], word: str, result: List[Path]):
         # Base case: out-of-bounds or already visited cell
-        if i < 0 or i >= n or j < 0 or j >= n or visited[i][j]:
+        if i < 0 or i >= len(board) or j < 0 or j >= len(board[0]) or visited[i][j] or len(word) == n+1:
             return
 
         # Append current coordinate to the path
@@ -67,7 +67,7 @@ def find_length_n_paths(n: int, board: Board, words: Iterable[str]) -> List[Path
 
     # Initialize result list, visited matrix, and perform DFS for each cell in the game board
     result = []
-    visited = [[False] * n for _ in range(n)]
+    visited = [[False] * len(board[0]) for _ in range(len(board))]
 
     for i in range(len(board)):
         for j in range(len(board[0])):
@@ -75,6 +75,9 @@ def find_length_n_paths(n: int, board: Board, words: Iterable[str]) -> List[Path
             dfs(i, j, [], visited, word, result)
 
     return [[tuple(coord) for coord in path] for path in result]
+
+
+
 
 
 def find_length_n_words(n: int, board: Board, words: Iterable[str]) -> List[Path]:
