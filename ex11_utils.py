@@ -1,15 +1,29 @@
 from typing import List, Tuple, Iterable, Optional, Set
+from copy import deepcopy
 
 import boggle_board_randomizer
 
 Board = List[List[str]]
 Path = List[Tuple[int, int]]
 Coordinate = Tuple[int, int]
+VisitedBoard = List[List[bool]]
+
+DIRECTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1),
+              (1, 1)]
 
 
-DIRECTIONS = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
-
-def is_valid_path(board: Board, path: Path, words: Iterable[str]) -> Optional[str]:
+def is_valid_path(board: Board, path: Path, words: Iterable[str]) \
+        -> Optional[str]:
+    """
+    Function receives a board, a path on the board and an iterable of words
+    and checks if the given path is valid a and creates a word that is in
+    the words iterable.
+    :param board: A game board
+    :param path: A path of coordinates
+    :param words: An iterable of words
+    :return: The word created by the path if the path is valid and word is
+    in the words iterable, None otherwise.
+    """
     if len(path) == 0:
         return None
     word = ""
@@ -27,13 +41,28 @@ def is_valid_path(board: Board, path: Path, words: Iterable[str]) -> Optional[st
 
 
 def is_in_board(board: Board, curr_coordinate: Coordinate) -> bool:
+    """
+    Function checks if coordinates are within the board
+    :param board: the game board
+    :param curr_coordinate: coordinates to check
+    :return: True if within the board, False otherwise
+    """
     curr_row, curr_col = curr_coordinate
     rows = len(board)
     cols = len(board[0])
-    return 0 <= curr_row < rows and 0 <= curr_col < cols
+    if 0 <= curr_row < rows and 0 <= curr_col < cols:
+        return True
+    return False
 
 
-def is_valid_distance(curr_coordinate: Coordinate, next_coordinate: Coordinate) -> bool:
+def is_valid_distance(curr_coordinate: Coordinate, next_coordinate:
+                      Coordinate) -> bool:
+    """
+    Function checks if the distance between two coordinates is valid.
+    :param curr_coordinate: A coordinate
+    :param next_coordinate: A coordinate
+    :return: True if valid distance, False otherwise.
+    """
     curr_y, curr_x = curr_coordinate
     next_y, next_x = next_coordinate
     if abs(curr_y - next_y) > 1 or abs(curr_x - next_x) > 1:
@@ -41,94 +70,64 @@ def is_valid_distance(curr_coordinate: Coordinate, next_coordinate: Coordinate) 
     return True
 
 
-# def find_length_n_paths(n: int, board: Board, words: Iterable[str]) -> List[Path]:
-#     # Inner function for depth-first search (DFS) traversal
-#     def dfs(i: int, j: int, path: Path, visited: List[List[bool]], word: str, result: List[Path]):
-#         # Base case: out-of-bounds or already visited cell
-#         if i < 0 or i >= len(board) or j < 0 or j >= len(board[0]) or visited[i][j] or len(word) == n+1:
-#             return
-#
-#         # Append current coordinate to the path
-#         path.append((i, j))
-#         visited[i][j] = True
-#
-#         # Check if the path forms a word of length n from the words list
-#         if len(word) == n and word in words and path not in result:
-#             result.append(path[:])  # Append a copy of the path to the result list
-#
-#         # Explore neighboring cells using DFS
-#         for di in [-1, 0, 1]:
-#             for dj in [-1, 0, 1]:
-#                 ni, nj = i + di, j + dj
-#                 if ni >= 0 and ni < len(board) and nj >= 0 and nj < len(board[0]):
-#                     next_word = word + board[ni][nj]
-#                     dfs(ni, nj, path, visited, next_word, result)
-#
-#         # Backtrack: mark current cell as unvisited and remove it from the path
-#         visited[i][j] = False
-#         path.pop()
-#
-#     # Initialize result list, visited matrix, and perform DFS for each cell in the game board
-#     result = []
-#     visited = [[False] * len(board[0]) for _ in range(len(board))]
-#
-#     for i in range(len(board)):
-#         for j in range(len(board[0])):
-#             word = board[i][j]  # Start a new word from each cell
-#             dfs(i, j, [], visited, word, result)
-#
-#     return [[tuple(coord) for coord in path] for path in result]
-
-
-def backtrack(row, col, path, visited, board, valid_words, result, n,
-              curr_word):
-    rows = len(board)
-    cols = len(board[0])
-
-    # Append the current letter to the path
+def backtrack_path_finder(row: int, col: int, path: List[Coordinate],
+                          visited: VisitedBoard, board: Board,
+                          valid_words: Iterable[str], result: List[Path],
+                          n: int, curr_word: str, length_type) -> None:
+    """
+    Function helps find all the appropriate paths using backtracking.
+    :param row: The index of the row
+    :param col: The index of the column
+    :param path: The current path to explore
+    :param visited: A board of all the visited places, so they aren't explored
+    :param board: A game board
+    :param valid_words: An iterable of all the words that are possible
+    :param result: A list of coordinates of the possible paths
+    :param n: The variable n that controls the length of the path or word
+    :param curr_word: The current word being built
+    :param length_type: If n represents the length of path or length of word
+    :return: Function does not return, updates results argument in place.
+    """
+    # Append the current letter to the current word and coordinate to path list
     curr_word += board[row][col]
-    path.append((row, col))
+    curr_path = path + [(row, col)]
 
-    # Mark the current position as visited
-    visited[row][col] = True
-    valid_words = relevant_words(valid_words, curr_word, n)
+    visited[row][col] = True    # Mark the current position as visited
+    valid_words = get_relevant_words(valid_words, curr_word, n)
     if len(valid_words) == 0:
         return
-    # Check if the path forms a valid word of length n
-    if len(path) == n and curr_word in valid_words:
-        result.append(path[:])
-        return
+
+    # Check if length of path or word is valid and the word is in valid_words
+    if length_type == "path":
+        if len(curr_path) == n and curr_word in valid_words:
+            result.append(deepcopy(curr_path))
+            return
+    if length_type == "word":
+        if len(curr_word) == n and curr_word in valid_words:
+            result.append(deepcopy(curr_path))
+            return
+
+    # Move through all directions
+    for dy, dx in DIRECTIONS:
+        new_row, new_col = row + dy, col + dx
+
+        # Check if the new coord is within the board boundaries and not visited
+        if is_in_board(board, (new_row, new_col)) \
+                and not visited[new_row][new_col]:
+            backtrack_path_finder(new_row, new_col, curr_path[:],
+                                  deepcopy(visited), board, valid_words,
+                                  result, n, curr_word, length_type)
 
 
-    # Explore all possible directions
-    for dx, dy in DIRECTIONS:
-        new_row = row + dy
-        new_col = col + dx
-
-        # Check if the new position is within the board boundaries and not visited
-        if is_in_board(board, (new_row, new_col)) and not visited[new_row][new_col]:
-            path_copy = path[:]
-            visited_copy = [row[:] for row in visited]
-            backtrack(new_row, new_col, path_copy, visited_copy,
-                      board, valid_words, result, n, curr_word)
-
-    #path.pop()
-    visited[row][col] = False
-
-
-def find_length_n_paths(n: int, board: Board, words: Iterable[str]) -> List[Path]:
+def find_length_n_paths(n: int, board: Board, words: Iterable[str]) \
+        -> List[Path]:
     rows = len(board)
-    if rows == 0:
-        return []
-
     cols = len(board[0])
-    if cols == 0:
+    if rows == 0 or cols == 0:
         return []
 
-    # Create a set of valid words for efficient lookup
+    # Remove words that their letters are not on the board
     valid_words = get_word_letters_in_board(board, words)
-
-    # Initialize the result list to store all found words
     result = []
 
     # Iterate through each cell of the board and perform backtracking
@@ -136,17 +135,23 @@ def find_length_n_paths(n: int, board: Board, words: Iterable[str]) -> List[Path
         for j in range(cols):
             # Initialize a visited matrix for each starting cell
             visited = [[False] * cols for _ in range(rows)]
-            backtrack(i, j, [], visited, board, valid_words, result, n, "")
+            backtrack_path_finder(i, j, [], visited, board, valid_words,
+                                  result, n, "", "path")
 
     return result
 
 
-def get_word_letters_in_board(board: Board, words: List[str]):
+def get_word_letters_in_board(board: Board, words: Iterable[str]) -> \
+        Set[str]:
+    """
+    Function receives an iterable of words and returns a set of all the
+    words that their letters appear on the board.
+    :param board: A game board
+    :param words: An iterable of words
+    :return: A new set of words that all their letters appear on the board
+    """
     valid_words = set()
     board_letters = get_letters_in_board(board)
-    # for word in words:
-    #     if set(word).issubset(board_letters):
-    #         valid_words.add(word)
 
     for word in words:
         is_valid_word = True
@@ -161,29 +166,64 @@ def get_word_letters_in_board(board: Board, words: List[str]):
 
 
 def get_letters_in_board(board: Board) -> Set[str]:
+    """
+    Function receives a board and returns a set of all the letters on the
+    board.
+    :param board: A game board
+    :return: A set of all the letters on the board.
+    """
     board_letters = set()
     for row_i in range(len(board)):
         for col_i in range(len(board[0])):
             board_letters.update(set(board[row_i][col_i]))
     return board_letters
 
-def find_length_n_words(n: int, board: Board, words: Iterable[str]) -> List[Path]:
-    pass
+
+def find_length_n_words(n: int, board: Board, words: Iterable[str])\
+        -> List[Path]:
+    rows = len(board)
+    cols = len(board[0])
+
+    if rows == 0 or cols == 0:
+        return []
+
+    # Remove words that their letters are not on the board
+    valid_words = get_word_letters_in_board(board, words)
+    result = []
+
+    # Iterate through each cell of the board and perform backtracking
+    for i in range(rows):
+        for j in range(cols):
+            # Initialize a visited matrix for each starting cell
+            visited = [[False] * cols for _ in range(rows)]
+            backtrack_path_finder(i, j, [], visited, board, valid_words,
+                                  result, n, "", "word")
+
+    return result
 
 
 def max_score_paths(board: Board, words: Iterable[str]) -> List[Path]:
     pass
 
 
-def relevant_words(words: Iterable[str], partial_word: str, n: int) -> set:
+def get_relevant_words(words: Iterable[str], curr_word: str, n: int) \
+        -> Set[str]:
     """
-    Function filter the given words according
-    to a given partial word and an int.
+    Function receives a words iterable, the start of a word and a length n
+    and returns all the words that are currently optional and relevant given
+    the current word.
+    :param words: An iterable of words
+    :param curr_word: the current word to see if it is the start of a word
+    in the words iterable
+    :param n: The length of the word
+    :return: A reduced set of all the words that are currently relevant.
     """
-    relevant = set()
-    length = len(partial_word)
+    relevant_words_set = set()
+    curr_length = len(curr_word)
 
     for word in words:
-        if len(word) == n and partial_word == word[:length]:
-            relevant.add(word)
-    return relevant
+        # len(word) >= n because length of word can be longer than length of
+        # path. Deals with instance of 'QU'
+        if len(word) >= n and curr_word == word[:curr_length]:
+            relevant_words_set.add(word)
+    return relevant_words_set
