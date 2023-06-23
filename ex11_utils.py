@@ -121,6 +121,15 @@ def backtrack_path_finder(row: int, col: int, path: List[Coordinate],
 
 def find_length_n_paths(n: int, board: Board, words: Iterable[str]) \
         -> List[Path]:
+    """
+    Function receives a board, a length n and an iterable of words and
+    returns a list of paths that build words in the words iterable of path
+    length n.
+    :param n: A length int
+    :param board: A game board
+    :param words: An iterable of words
+    :return: A list of paths of all the valid words of path length n
+    """
     rows = len(board)
     cols = len(board[0])
     if rows == 0 or cols == 0:
@@ -133,7 +142,6 @@ def find_length_n_paths(n: int, board: Board, words: Iterable[str]) \
     # Iterate through each cell of the board and perform backtracking
     for i in range(rows):
         for j in range(cols):
-            # Initialize a visited matrix for each starting cell
             visited = [[False] * cols for _ in range(rows)]
             backtrack_path_finder(i, j, [], visited, board, valid_words,
                                   result, n, "", "path")
@@ -181,6 +189,15 @@ def get_letters_in_board(board: Board) -> Set[str]:
 
 def find_length_n_words(n: int, board: Board, words: Iterable[str])\
         -> List[Path]:
+    """
+        Function receives a board, a length n and an iterable of words and
+        returns a list of paths that build words in the words iterable of
+        length n.
+        :param n: A length int
+        :param board: A game board
+        :param words: An iterable of words
+        :return: A list of paths of all the valid words of length n
+        """
     rows = len(board)
     cols = len(board[0])
 
@@ -203,7 +220,34 @@ def find_length_n_words(n: int, board: Board, words: Iterable[str])\
 
 
 def max_score_paths(board: Board, words: Iterable[str]) -> List[Path]:
-    pass
+    """
+    Function receives a board and an iterable of words and returns a list
+    paths the yield the highest score for the board.
+    :param board: A game board
+    :param words: An iterable of words
+    :return: A list of paths that yield the highest score
+    """
+    max_path_length = len(board) * len(board[0])
+    result = dict()
+    visited_words = dict()
+    good_words = get_word_letters_in_board(board, words)
+
+    for n in range(max_path_length):
+        curr_valid_words = set([word for word in good_words if len(word) >= n])
+        if len(curr_valid_words) == 0:
+            break
+        n_paths_results = find_length_n_paths(n, board, curr_valid_words)
+        for path in n_paths_results:
+            curr_word = build_word(path, board)
+            curr_score = len(path) ** 2
+            if curr_word in visited_words.keys():
+                if curr_score > visited_words[curr_word]:
+                    visited_words[curr_word] = curr_score
+                    result[curr_word] = path
+            else:
+                visited_words[curr_word] = curr_score
+                result[curr_word] = path
+    return list(result.values())
 
 
 def get_relevant_words(words: Iterable[str], curr_word: str, n: int) \
@@ -227,3 +271,18 @@ def get_relevant_words(words: Iterable[str], curr_word: str, n: int) \
         if len(word) >= n and curr_word == word[:curr_length]:
             relevant_words_set.add(word)
     return relevant_words_set
+
+
+def build_word(path: Path, board: Board) -> str:
+    """
+    Function receives a path and a board and returns the built word from the
+    given path.
+    :param path: A list of coordinates
+    :param board: A game Board
+    :return: str of the built word from the path on the board
+    """
+    word = ""
+    for coordinate in path:
+        row, col = coordinate
+        word += board[row][col]
+    return word
