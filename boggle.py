@@ -11,7 +11,7 @@ POP_PATH = 'sounds/pop.mp3'
 END_GAME_PATH = 'sounds/end_game.mp3'
 CORRECT_SOUND_PATH = 'sounds/submit_correct_word.mp3'
 INCORRECT_SOUND_PATH = 'sounds/submit_incorrect_word.mp3'
-
+START_GAME_PATH = './start_game_button.png'
 
 class BoggleGUI:
     def __init__(self, boggle_board: BoggleBoard):
@@ -40,9 +40,11 @@ class BoggleGUI:
         self.root.mainloop()
 
     def create_widgets(self):
-        self.start_button = tk.Button(self.root, text="Start",
-                                      command=self.start_game)
-        self.start_button.pack()
+        self.start_pic = tk.PhotoImage(file=START_GAME_PATH)
+        self.start_button = tk.Button(self.root,
+                                      command=self.start_game,
+                                      image=self.start_pic)
+        self.start_button.pack(pady=30, padx=30, side=tk.TOP)
 
         self.timer_label = tk.Label(self.root, text="", font=(FONT, 16))
         self.timer_label.pack()
