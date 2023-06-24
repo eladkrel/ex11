@@ -1,6 +1,6 @@
 from boggle_board_randomizer import randomize_board
 import ex11_utils
-from typing import List, Tuple, Iterable, Optional, Set
+from typing import List, Tuple
 from copy import deepcopy
 
 Board = List[List[str]]
@@ -32,7 +32,6 @@ class BoggleBoard:
         """
         with open(WORDS_PATH, "r") as f:
             self.__words = f.read()
-
 
     def get_next_possible_moves(self, coordinate: Coordinate):
         """
@@ -86,7 +85,7 @@ class BoggleBoard:
         Function tries to add a coordinate as the next step. If successful
         returns True, False otherwise.
         :param coordinate: coordinates of the next step.
-        :return: True if valid next coordinate, False othwerwise.
+        :return: True if valid next coordinate, False otherwise.
         """
         if coordinate in self.get_next_possible_moves(coordinate):
             self.__current_path.append(coordinate)
@@ -96,5 +95,3 @@ class BoggleBoard:
 
     def get_submitted_words(self):
         return self.__submitted_words
-
-
