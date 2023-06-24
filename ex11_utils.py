@@ -1,8 +1,6 @@
 from typing import List, Tuple, Iterable, Optional, Set
 from copy import deepcopy
 
-import boggle_board_randomizer
-
 Board = List[List[str]]
 Path = List[Tuple[int, int]]
 Coordinate = Tuple[int, int]

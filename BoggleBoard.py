@@ -21,46 +21,51 @@ class BoggleBoard:
         self.__load_game_words()
         self.__max_score_paths = ex11_utils.max_score_paths(self.__board,
                                                             self.__words)
-        self.__paths = set()
+        self.__paths = []
         self.__submitted_words = set()
         self.__score = 0
+        self.__current_path = []
 
     def __load_game_words(self):
         """
         Function loads all the game words from boggle_dict.txt
         """
-        with open(WORDS_PATH, "rb") as f:
-            self.__words = f.readlines()
+        with open(WORDS_PATH, "r") as f:
+            self.__words = f.read()
 
-    def get_next_possible_moves(self, row, col):
+
+    def get_next_possible_moves(self, coordinate: Coordinate):
         """
-        Function receives an index of a button on the board and changes that
-        all the buttons next to it are gray and enabled and the other buttons
-        are white and disabled.
-        :param row: row index
-        :param col: col index
+        Function receives a coordinate of a button on the board and changes
+        that all the buttons next to it are gray and enabled and the other
+        buttons are white and disabled.
+        :param coordinate: The coordinate indexes
         """
         next_possible_moves = set()
-
+        row, col = coordinate
         for r in range(len(self.__board)):
             for c in range(len(self.__board[0])):
-                if ex11_utils.is_in_board(self.__board, (r,c)) and \
+                if ex11_utils.is_in_board(self.__board, (r, c)) and \
                         ex11_utils.is_valid_distance((row, col), (r, c)):
                     next_possible_moves.add((r, c))
         return next_possible_moves
 
-    def add_submitted_word(self, path: Path) -> bool:
-        if not ex11_utils.is_valid_path():
+    def add_submitted_word(self, path=None) -> bool:
+        if path is None:
+            path = self.__current_path
+        self.__current_path = []
+        if not ex11_utils.is_valid_path(self.__board, path, self.__words):
             return False
         word = ex11_utils.build_word(path, self.__board)
-        if word not in self.__submitted_words and word in self.__words:
+        if word not in self.__submitted_words:
             self.__submitted_words.add(word)
-            self.__paths.add(path)
+            self.__paths.append(path)
             self.__update_score()
             return True
         return False
 
-    def get_board_copy(self):
+    def get_board_copy(self) -> Board:
+        """Returns a copy of the game board"""
         return deepcopy(self.__board)
 
     def __update_score(self) -> None:
@@ -73,6 +78,23 @@ class BoggleBoard:
         self.__score = score
 
     def get_score(self):
+        """Returns the game score"""
         return self.__score
+
+    def add_coordinate(self, coordinate: Coordinate) -> bool:
+        """
+        Function tries to add a coordinate as the next step. If successful
+        returns True, False otherwise.
+        :param coordinate: coordinates of the next step.
+        :return: True if valid next coordinate, False othwerwise.
+        """
+        if coordinate in self.get_next_possible_moves(coordinate):
+            self.__current_path.append(coordinate)
+            return True
+        else:
+            return False
+
+    def get_submitted_words(self):
+        return self.__submitted_words
 
 

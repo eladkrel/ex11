@@ -3,7 +3,7 @@ import time
 import pygame
 from BoggleBoard import *
 
-GAME_TIME = 20  # 3 minutes in seconds
+GAME_TIME = 200  # 3 minutes in seconds
 FONT = 'Helvetica'
 LOBBY_BEFORE_START_PATH = 'sounds/lobby_before_start.mp3'
 GAME_PLAY_PATH = 'sounds/game_play.mp3'
@@ -40,7 +40,8 @@ class BoggleGUI:
         self.root.mainloop()
 
     def create_widgets(self):
-        self.start_button = tk.Button(self.root, text="Start", command=self.start_game)
+        self.start_button = tk.Button(self.root, text="Start",
+                                      command=self.start_game)
         self.start_button.pack()
 
         self.timer_label = tk.Label(self.root, text="", font=(FONT, 16))
@@ -61,10 +62,10 @@ class BoggleGUI:
         for row in range(len(board)):
             row_buttons = []
             for col in range(len(board[0])):
+                coordinate = (row, col)
                 button = tk.Button(self.board_frame, text=board[row][col],
-                                   width=6,
-                                   height=3,
-                                   command=lambda r=row, c=col: self.add_letter(r, c))
+                                   width=6, height=3,
+                                   command=lambda c=coordinate: self.add_letter(c))
                 button.grid(row=row, column=col)
                 row_buttons.append(button)
             self.board_buttons.append(row_buttons)
@@ -106,14 +107,15 @@ class BoggleGUI:
             pygame.mixer.music.load(END_GAME_PATH)
             pygame.mixer.music.play()
 
-    def add_letter(self, row, col):
+    def add_letter(self, coordinate: Coordinate):
+        row, col = coordinate
         letter = self.board_buttons[row][col]['text']
 
         button = self.board_buttons[row][col]
         button.config(state=tk.DISABLED, bg="light gray")
         self.clicked_buttons.add(button)
-        self.update_possible_buttons(row, col)
-
+        self.update_possible_buttons(coordinate)
+        self.__boggle_board.add_coordinate(coordinate)
         current_word = self.word_entry.get()
         new_word = current_word + letter
         self.word_entry.delete(0, tk.END)
@@ -122,17 +124,16 @@ class BoggleGUI:
         pygame.mixer.music.load(POP_PATH)
         pygame.mixer.music.play()
 
-    def update_possible_buttons(self, row: int, col: int):
+    def update_possible_buttons(self, coordinate: Coordinate):
         """
         Function receives an index of a button on the board and changes that
         all the buttons next to it are gray and enabled and the other buttons
         are white and disabled.
-        :param row: row index
-        :param col: col index
+        :param coordinate: coordinate indexes
         """
         self.next_possible_buttons = set()
-        next_moves = self.__boggle_board.get_next_possible_moves(row, col)
-
+        next_moves = self.__boggle_board.get_next_possible_moves(coordinate)
+        row, col = coordinate
         for r in range(len(self.board_buttons)):
             for c in range(len(self.board_buttons[0])):
                 button = self.board_buttons[r][c]
@@ -147,10 +148,8 @@ class BoggleGUI:
         word = self.word_entry.get()
         self.word_entry.delete(0, tk.END)
 
-        valid = self.check_word(word)
-
+        valid = self.__boggle_board.add_submitted_word()
         if valid:
-            self.submitted_words.append(word)
             self.update_word_list()
             self.invalid_word_label.config(text="")
             pygame.mixer.music.load(CORRECT_SOUND_PATH)
@@ -160,8 +159,8 @@ class BoggleGUI:
             pygame.mixer.music.load(INCORRECT_SOUND_PATH)
             pygame.mixer.music.play()
 
-        for button in self.clicked_buttons:
-            button.config(bg="white")
+        # for button in self.clicked_buttons:
+        #     button.config(bg="white")
 
         self.clicked_buttons.clear()
 
@@ -169,17 +168,9 @@ class BoggleGUI:
             for button in row:
                 button.config(state=tk.NORMAL, bg="white")
 
-    def check_word(self, word):
-        if word in self.submitted_words:
-            return False
-        elif len(word) < 3:
-            return False
-        else:
-            return True
-
     def update_word_list(self):
         self.word_listbox.delete(0, tk.END)
-        for word in self.submitted_words:
+        for word in self.__boggle_board.get_submitted_words():
             self.word_listbox.insert(tk.END, word)
 
 
