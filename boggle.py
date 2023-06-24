@@ -13,6 +13,7 @@ CORRECT_SOUND_PATH = 'sounds/submit_correct_word.mp3'
 INCORRECT_SOUND_PATH = 'sounds/submit_incorrect_word.mp3'
 START_GAME_PATH = './start_game_button.png'
 
+
 class BoggleGUI:
     def __init__(self, boggle_board: BoggleBoard):
         self.root = tk.Tk()
@@ -24,9 +25,11 @@ class BoggleGUI:
         self.words_text = None
         self.submit_button = None
         self.start_button = None
+        self.start_pic = None
         self.timer_label = None
         self.start_time = None
         self.word_entry = None
+        self.word_listbox = None
         self.submitted_words = []
         self.clicked_buttons = set()
         self.next_possible_buttons = set()
@@ -64,10 +67,10 @@ class BoggleGUI:
         for row in range(len(board)):
             row_buttons = []
             for col in range(len(board[0])):
-                coordinate = (row, col)
+                coord = (row, col)
                 button = tk.Button(self.board_frame, text=board[row][col],
                                    width=6, height=3,
-                                   command=lambda c=coordinate: self.add_letter(c))
+                                   command=lambda c=coord: self.add_letter(c))
                 button.grid(row=row, column=col)
                 row_buttons.append(button)
             self.board_buttons.append(row_buttons)
@@ -78,7 +81,8 @@ class BoggleGUI:
         self.words_text = tk.Text(self.root, height=5)
         self.words_text.pack()
 
-        self.submit_button = tk.Button(self.root, text="Submit", command=self.submit_words)
+        self.submit_button = tk.Button(self.root, text="Submit",
+                                       command=self.submit_words)
         self.submit_button.pack()
 
         self.submitted_words = []
@@ -135,7 +139,6 @@ class BoggleGUI:
         """
         self.next_possible_buttons = set()
         next_moves = self.__boggle_board.get_next_possible_moves(coordinate)
-        row, col = coordinate
         for r in range(len(self.board_buttons)):
             for c in range(len(self.board_buttons[0])):
                 button = self.board_buttons[r][c]
@@ -147,7 +150,6 @@ class BoggleGUI:
                         button.config(state=tk.DISABLED, bg="white")
 
     def submit_words(self):
-        word = self.word_entry.get()
         self.word_entry.delete(0, tk.END)
 
         valid = self.__boggle_board.add_submitted_word()
