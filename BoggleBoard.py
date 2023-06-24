@@ -23,6 +23,7 @@ class BoggleBoard:
                                                             self.__words)
         self.__paths = set()
         self.__submitted_words = set()
+        self.__score = 0
 
     def __load_game_words(self):
         """
@@ -55,13 +56,23 @@ class BoggleBoard:
         if word not in self.__submitted_words and word in self.__words:
             self.__submitted_words.add(word)
             self.__paths.add(path)
+            self.__update_score()
             return True
         return False
 
     def get_board_copy(self):
         return deepcopy(self.__board)
 
+    def __update_score(self) -> None:
+        """
+        Function updates the game score.
+        """
+        score = 0
+        for path in self.__paths:
+            score += len(path) ** 2
+        self.__score = score
 
-
+    def get_score(self):
+        return self.__score
 
 
