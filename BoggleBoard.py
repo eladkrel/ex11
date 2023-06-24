@@ -22,7 +22,7 @@ class BoggleBoard:
         self.__max_score_paths = ex11_utils.max_score_paths(self.__board,
                                                             self.__words)
         self.__paths = []
-        self.__submitted_words = set()
+        self.__submitted_words = []
         self.__score = 0
         self.__current_path = []
 
@@ -57,7 +57,7 @@ class BoggleBoard:
             return False
         word = ex11_utils.build_word(path, self.__board)
         if word not in self.__submitted_words:
-            self.__submitted_words.add(word)
+            self.__submitted_words.insert(0, word)
             self.__paths.append(path)
             self.__update_score()
             return True
