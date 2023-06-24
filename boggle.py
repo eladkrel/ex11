@@ -12,20 +12,22 @@ END_GAME_PATH = 'sounds/end_game.mp3'
 CORRECT_SOUND_PATH = 'sounds/submit_correct_word.mp3'
 INCORRECT_SOUND_PATH = 'sounds/submit_incorrect_word.mp3'
 START_GAME_PATH = './start_game_button.png'
+SUBMIT_BUTTON_PATH = './submit_1.png'
 
 
 class BoggleGUI:
     def __init__(self, boggle_board: BoggleBoard):
         self.root = tk.Tk()
         self.root.title("Boggle Game")
-        self.root.geometry("500x500")
+        self.root.geometry("600x600")
         self.__boggle_board = boggle_board
         self.board_frame = None
         self.board_buttons = []
         self.words_text = None
         self.submit_button = None
         self.start_button = None
-        self.start_pic = None
+        self.start_pic = tk.PhotoImage(file=START_GAME_PATH)
+        self.submit_pic = tk.PhotoImage(file=SUBMIT_BUTTON_PATH)
         self.timer_label = None
         self.start_time = None
         self.word_entry = None
@@ -43,11 +45,10 @@ class BoggleGUI:
         self.root.mainloop()
 
     def create_widgets(self):
-        self.start_pic = tk.PhotoImage(file=START_GAME_PATH)
         self.start_button = tk.Button(self.root,
                                       command=self.start_game,
                                       image=self.start_pic)
-        self.start_button.pack(pady=30, padx=30, side=tk.TOP)
+        self.start_button.pack(pady=200, padx=30, side=tk.TOP)
 
         self.timer_label = tk.Label(self.root, text="", font=(FONT, 16))
         self.timer_label.pack()
@@ -69,7 +70,7 @@ class BoggleGUI:
             for col in range(len(board[0])):
                 coord = (row, col)
                 button = tk.Button(self.board_frame, text=board[row][col],
-                                   width=6, height=3,
+                                   width=8, height=4,
                                    command=lambda c=coord: self.add_letter(c))
                 button.grid(row=row, column=col)
                 row_buttons.append(button)
@@ -78,10 +79,7 @@ class BoggleGUI:
         self.word_entry = tk.Entry(self.root, font=(FONT, 12))
         self.word_entry.pack()
 
-        self.words_text = tk.Text(self.root, height=5)
-        self.words_text.pack()
-
-        self.submit_button = tk.Button(self.root, text="Submit",
+        self.submit_button = tk.Button(self.root, image=self.submit_pic,
                                        command=self.submit_words)
         self.submit_button.pack()
 
