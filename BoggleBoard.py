@@ -20,7 +20,7 @@ class BoggleBoard:
         self.__board = randomize_board()
         self.__load_game_words()
         self.__max_score_paths = ex11_utils.max_score_paths(self.__board,
-                                                            self.__words)
+                                                            self.__words)   # CHECK IF NEEDED
         self.__paths = []
         self.__submitted_words = []
         self.__score = 0
@@ -38,7 +38,10 @@ class BoggleBoard:
             content = file.read()
 
         # Split the contents into individual words and remove whitespace
-        self.__words = [word.strip() for word in content.split()]
+        self.__words = [word for word in content.split()]
+
+        # self.__words = [word.strip() for word in content.split()]  # NEEDED?
+
 
 
 
@@ -55,10 +58,11 @@ class BoggleBoard:
             for c in range(len(self.__board[0])):
                 if ex11_utils.is_in_board(self.__board, (r, c)) and \
                         ex11_utils.is_valid_distance((row, col), (r, c)):
+                    # if player can do this move
                     next_possible_moves.add((r, c))
         return next_possible_moves
 
-    def add_submitted_word(self, path=None) -> bool:
+    def add_submitted_word(self, path=None) -> bool: # NEED TO UNDERSTAND
         if path is None:
             path = self.__current_path
         self.__current_path = []
@@ -72,7 +76,7 @@ class BoggleBoard:
             return True
         return False
 
-    def get_board_copy(self) -> Board:
+    def get_board_copy(self) -> Board:  # WHY COPY?
         """Returns a copy of the game board"""
         return deepcopy(self.__board)
 

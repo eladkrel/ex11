@@ -3,8 +3,12 @@ import time
 import pygame
 from BoggleBoard import *
 
-GAME_TIME = 10  # 3 minutes in seconds
-FONT = 'Helvetica'
+import random  # check if can
+
+
+
+GAME_TIME = 180  # 3 minutes in seconds
+FONT = 'Bell MT'  # NEW
 LOBBY_BEFORE_START_PATH = 'sounds/lobby_before_start.mp3'
 GAME_PLAY_PATH = 'sounds/game_play.mp3'
 POP_PATH = 'sounds/pop.mp3'
@@ -13,17 +17,37 @@ CORRECT_SOUND_PATH = 'sounds/submit_correct_word.mp3'
 INCORRECT_SOUND_PATH = 'sounds/submit_incorrect_word.mp3'
 START_GAME_PATH = './start_game_button.png'
 SUBMIT_BUTTON_PATH = './submit_1.png'
+BG_COLOR = 'light blue'
 
 
 def disable_backspace(event):  # NEW
+    """
+    Function cancel 'backspace' when trying to delete information
+    from word entry.
+    :param event: KeyEvent
+    """
     if event.keysym == 'BackSpace':
         return 'break'  # Prevent Backspace key press from being processed
+
+
+def random_sounds():
+    """
+    Function randomize sound from specific folder.
+    """
+    icytower_sounds = ['sounds/icy_tower/aight.ogg', 'sounds/icy_tower/amazing.ogg', 'sounds/icy_tower/cheer.ogg',
+                 'sounds/icy_tower/extreme.ogg', 'sounds/icy_tower/fantastic.ogg', 'sounds/icy_tower/good.ogg',
+                 'sounds/icy_tower/great.ogg', 'sounds/icy_tower/splendid.ogg', 'sounds/icy_tower/super.ogg',
+                 'sounds/icy_tower/sweet.ogg', 'sounds/icy_tower/unbelievable.ogg', 'sounds/icy_tower/wow.ogg']
+    random_file = random.choice(icytower_sounds)
+    return random_file
+
 
 class BoggleGUI:
     def __init__(self, boggle_board: BoggleBoard):
         self.root = tk.Tk()
+        self.root.config(bg=BG_COLOR)  # NEW
         self.root.title("Boggle Game")
-        self.root.geometry("600x600")
+        self.root.geometry("700x600")  # NEW
         self.__boggle_board = boggle_board
         self.board_frame = None
         self.board_buttons = []
@@ -39,36 +63,32 @@ class BoggleGUI:
         self.submitted_words = []
         self.clicked_buttons = set()
         self.next_possible_buttons = set()
-
         self.invalid_word_label = None
-
         pygame.mixer.init()
-
         self.create_widgets()
-
         self.root.mainloop()
+        self.score_label = None  # NEW
 
     def create_widgets(self):
+        """
+        Function create widgets before game starts.
+        """
         self.start_button = tk.Button(self.root,
                                       command=self.start_game,
                                       image=self.start_pic)
         self.start_button.pack(pady=200, padx=30, side=tk.TOP)
 
-        self.timer_label = tk.Label(self.root, text="", font=(FONT, 16))
+        self.timer_label = tk.Label(self.root, text="", font=(FONT, 16), bg=BG_COLOR)
         self.timer_label.pack()
         pygame.mixer.Channel(0).play(pygame.mixer.Sound(
             LOBBY_BEFORE_START_PATH), loops=-1)
 
-    def start_game(self):
-        self.start_button.destroy()
-        pygame.mixer.Channel(0).play(pygame.mixer.Sound(GAME_PLAY_PATH),
-                                     loops=-1)
 
-        self.board_frame = tk.Frame(self.root, width=400, height=400)
-        self.board_frame.pack()
-
-        self.board_buttons = []
-        board = self.__boggle_board.get_board_copy()
+    def buttons_for_letters(self, board):
+        """
+        Function make buttons of all random letters in board.
+        :param board: Board
+        """
         for row in range(len(board)):
             row_buttons = []
             for col in range(len(board[0])):
@@ -80,34 +100,45 @@ class BoggleGUI:
                 row_buttons.append(button)
             self.board_buttons.append(row_buttons)
 
-        self.word_entry = tk.Entry(self.root, font=(FONT, 12))  # I can delete letters with this func
+    def start_game(self):
+        """
+        Function update game with all widgets and tools needed for the game to run.
+        """
+        self.start_button.destroy()
+        pygame.mixer.Channel(0).play(pygame.mixer.Sound(GAME_PLAY_PATH),
+                                     loops=-1)
+
+        self.board_frame = tk.Frame(self.root, width=400, height=400)
+        self.board_frame.pack()
+        self.board_buttons = []
+        board = self.__boggle_board.get_board_copy()
+        self.buttons_for_letters(board)  # create buttons for random letters  # NEW
+        self.word_entry = tk.Entry(self.root, font=(FONT, 12))
         self.word_entry.pack()
-        self.word_entry.bind('<KeyPress>', disable_backspace)
-
+        self.word_entry.bind('<KeyPress>', disable_backspace)  # NEW
         self.submit_button = tk.Button(self.root, image=self.submit_pic,
-                                       command=self.submit_words)
+                                       command=self.submit_words, bg=BG_COLOR)
         self.submit_button.pack()
-
         self.submitted_words = []
-        self.word_listbox = tk.Listbox(self.root, height=10, width=30)
-        self.word_listbox.pack()
-
-        self.invalid_word_label = tk.Label(self.root, text="", font=(FONT, 12))
+        self.word_listbox = tk.Listbox(self.root, height=17, width=25, bg=BG_COLOR)
+        self.word_listbox.place(x=500, y=31)
+        self.invalid_word_label = tk.Label(self.root, text="", font=(FONT, 12), bg=BG_COLOR)
         self.invalid_word_label.pack()
-
-        self.score_label = tk.Label(self.root, text="Score: 0")   #NEW
+        self.score_label = tk.Label(self.root, text="Score: 0", font=(FONT, 16), bg=BG_COLOR)   #NEW
         self.score_label.pack()  #NEW
-
         self.start_time = time.time()
         self.update_timer()
 
-    def update_timer(self):
+
+    def update_timer(self):  # NEED TO UNDERSTAND
+        """
+        Function updates the timer every second and handle the program
+        when game ends.
+        """
         elapsed_time = int(time.time() - self.start_time)
         remaining_time = max(GAME_TIME - elapsed_time, 0)
-
         minutes = remaining_time // 60
         seconds = remaining_time % 60
-
         timer_text = f"Time: {minutes:02d}:{seconds:02d}"
         self.timer_label.configure(text=timer_text)
 
@@ -120,30 +151,33 @@ class BoggleGUI:
         #     pygame.mixer.music.play()
 
         else:  #NEW
+
             self.timer_label.configure(text="Time: 00:00")
             self.board_frame.destroy()
-            # self.board_frame.configure(state=tk.DISABLED)
-            self.word_entry.configure(state=tk.DISABLED)
-            self.submit_button.configure(state=tk.DISABLED)
-            # self.y_button = tk.Button(self.root, text='Y', font=(FONT, 30), command=self.start_over)
-            # self.y_button.pack(side='top')
-            # self.n_button = tk.Button(self.root, text='N', font=(FONT, 30), command=self.end_game)
-            # self.n_button.pack(side='top')
-
-            y_and_n_frame = tk.Frame(self.root)
-            y_and_n_frame.pack()
-            self.end_label = tk.Label(self.root, text="Time's up! Play another game?", font=(FONT, 16))
-            self.end_label.pack()
-            self.y_button = tk.Button(y_and_n_frame, text='Y', font=(FONT, 30), command=self.start_over)
-            self.y_button.grid(row=0, column=0)
-            self.n_button = tk.Button(y_and_n_frame, text='N', font=(FONT, 30), command=self.end_game)
-            self.n_button.grid(row=0, column=1)
+            self.word_entry.destroy()
+            self.submit_button.destroy()
+            end_frame = tk.Frame(self.root, bg=BG_COLOR)
+            end_frame.pack()
+            self.end_label = tk.Label(end_frame, text="Time's up! Play another game?", font=(FONT, 16), bg=BG_COLOR)
+            self.end_label.grid(row=0, column=0, columnspan=2)
+            self.y_button = tk.Button(end_frame, text='Yes!!', font=(FONT, 20), command=self.start_over, bg=BG_COLOR)
+            self.y_button.grid(row=1, column=0)
+            self.n_button = tk.Button(end_frame, text='Nope', font=(FONT, 20), command=self.end_game, bg=BG_COLOR)
+            self.n_button.grid(row=1, column=1)
 
             pygame.mixer.Channel(0).stop()
             pygame.mixer.music.load(END_GAME_PATH)
             pygame.mixer.music.play()
 
+
+
+
+
     def add_letter(self, coordinate: Coordinate):
+        """
+        Function updates the word the player is reaching
+        with adding the current letter.
+        """
         row, col = coordinate
         letter = self.board_buttons[row][col]['text']
 
@@ -180,16 +214,23 @@ class BoggleGUI:
                         button.config(state=tk.DISABLED, bg="white")
 
     def submit_words(self):
+        """
+        Function checks if word is valid. If so, word is added to the word list
+        and player gets points.
+        """
         self.word_entry.delete(0, tk.END)
 
         valid = self.__boggle_board.add_submitted_word()
         if valid:
+            # word is good
             self.update_word_list()
             self.invalid_word_label.config(text="")
-            pygame.mixer.music.load(CORRECT_SOUND_PATH)
+            pygame.mixer.music.load(random_sounds())  # NEW
+            # pygame.mixer.music.load(CORRECT_SOUND_PATH)
             pygame.mixer.music.play()
             self.score_label.config(text=f"Score: {self.__boggle_board.get_score()}")  # NEW
         else:
+            # word is no good
             self.invalid_word_label.config(text="Invalid word!")
             pygame.mixer.music.load(INCORRECT_SOUND_PATH)
             pygame.mixer.music.play()
@@ -197,13 +238,13 @@ class BoggleGUI:
         # for button in self.clicked_buttons:
         #     button.config(bg="white")
 
+        # reset the board so player can start look for other word.
         self.clicked_buttons.clear()
-
         for row in self.board_buttons:
             for button in row:
                 button.config(state=tk.NORMAL, bg="white")
 
-    def update_word_list(self):
+    def update_word_list(self):  # NEED TO UNDERSTAND
         self.word_listbox.delete(0, tk.END)
         for word in self.__boggle_board.get_submitted_words():
             self.word_listbox.insert(tk.END, word)
@@ -211,13 +252,22 @@ class BoggleGUI:
 
 
     def start_over(self):  #NEW
+        """
+        Function starts new game if player wants to.
+        """
         self.root.destroy()
         new_game = BoggleGUI(BoggleBoard())
 
     def end_game(self):  #NEW
+        """
+        Function exit game if player wants to.
+        """
         self.root.destroy()
         pygame.mixer.music.stop()
         pygame.quit()
 
+
 if __name__ == "__main__":
     boggle_gui = BoggleGUI(BoggleBoard())
+
+
