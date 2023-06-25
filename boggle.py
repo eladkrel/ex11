@@ -3,7 +3,7 @@ import time
 import pygame
 from BoggleBoard import *
 
-GAME_TIME = 180  # 3 minutes in seconds
+GAME_TIME = 10  # 3 minutes in seconds
 FONT = 'Helvetica'
 LOBBY_BEFORE_START_PATH = 'sounds/lobby_before_start.mp3'
 GAME_PLAY_PATH = 'sounds/game_play.mp3'
@@ -14,6 +14,10 @@ INCORRECT_SOUND_PATH = 'sounds/submit_incorrect_word.mp3'
 START_GAME_PATH = './start_game_button.png'
 SUBMIT_BUTTON_PATH = './submit_1.png'
 
+
+def disable_backspace(event):  # NEW
+    if event.keysym == 'BackSpace':
+        return 'break'  # Prevent Backspace key press from being processed
 
 class BoggleGUI:
     def __init__(self, boggle_board: BoggleBoard):
@@ -76,8 +80,9 @@ class BoggleGUI:
                 row_buttons.append(button)
             self.board_buttons.append(row_buttons)
 
-        self.word_entry = tk.Entry(self.root, font=(FONT, 12))
+        self.word_entry = tk.Entry(self.root, font=(FONT, 12))  # I can delete letters with this func
         self.word_entry.pack()
+        self.word_entry.bind('<KeyPress>', disable_backspace)
 
         self.submit_button = tk.Button(self.root, image=self.submit_pic,
                                        command=self.submit_words)
@@ -89,6 +94,9 @@ class BoggleGUI:
 
         self.invalid_word_label = tk.Label(self.root, text="", font=(FONT, 12))
         self.invalid_word_label.pack()
+
+        self.score_label = tk.Label(self.root, text="Score: 0")   #NEW
+        self.score_label.pack()  #NEW
 
         self.start_time = time.time()
         self.update_timer()
@@ -105,8 +113,32 @@ class BoggleGUI:
 
         if remaining_time > 0:
             self.root.after(1000, self.update_timer)
-        else:
-            self.timer_label.configure(text="Time's up!")
+        # else:
+        #     self.timer_label.configure(text="Time's up!")
+        #     pygame.mixer.Channel(0).stop()
+        #     pygame.mixer.music.load(END_GAME_PATH)
+        #     pygame.mixer.music.play()
+
+        else:  #NEW
+            self.timer_label.configure(text="Time: 00:00")
+            self.board_frame.destroy()
+            # self.board_frame.configure(state=tk.DISABLED)
+            self.word_entry.configure(state=tk.DISABLED)
+            self.submit_button.configure(state=tk.DISABLED)
+            # self.y_button = tk.Button(self.root, text='Y', font=(FONT, 30), command=self.start_over)
+            # self.y_button.pack(side='top')
+            # self.n_button = tk.Button(self.root, text='N', font=(FONT, 30), command=self.end_game)
+            # self.n_button.pack(side='top')
+
+            y_and_n_frame = tk.Frame(self.root)
+            y_and_n_frame.pack()
+            self.end_label = tk.Label(self.root, text="Time's up! Play another game?", font=(FONT, 16))
+            self.end_label.pack()
+            self.y_button = tk.Button(y_and_n_frame, text='Y', font=(FONT, 30), command=self.start_over)
+            self.y_button.grid(row=0, column=0)
+            self.n_button = tk.Button(y_and_n_frame, text='N', font=(FONT, 30), command=self.end_game)
+            self.n_button.grid(row=0, column=1)
+
             pygame.mixer.Channel(0).stop()
             pygame.mixer.music.load(END_GAME_PATH)
             pygame.mixer.music.play()
@@ -156,6 +188,7 @@ class BoggleGUI:
             self.invalid_word_label.config(text="")
             pygame.mixer.music.load(CORRECT_SOUND_PATH)
             pygame.mixer.music.play()
+            self.score_label.config(text=f"Score: {self.__boggle_board.get_score()}")  # NEW
         else:
             self.invalid_word_label.config(text="Invalid word!")
             pygame.mixer.music.load(INCORRECT_SOUND_PATH)
@@ -175,6 +208,16 @@ class BoggleGUI:
         for word in self.__boggle_board.get_submitted_words():
             self.word_listbox.insert(tk.END, word)
 
+
+
+    def start_over(self):  #NEW
+        self.root.destroy()
+        new_game = BoggleGUI(BoggleBoard())
+
+    def end_game(self):  #NEW
+        self.root.destroy()
+        pygame.mixer.music.stop()
+        pygame.quit()
 
 if __name__ == "__main__":
     boggle_gui = BoggleGUI(BoggleBoard())

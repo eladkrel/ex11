@@ -30,8 +30,17 @@ class BoggleBoard:
         """
         Function loads all the game words from boggle_dict.txt
         """
-        with open(WORDS_PATH, "r") as f:
-            self.__words = f.read()
+        # with open(WORDS_PATH, "r") as f:
+        #     self.__words = f.read()
+
+        # Open the file and read its contents
+        with open(WORDS_PATH, "r") as file:
+            content = file.read()
+
+        # Split the contents into individual words and remove whitespace
+        self.__words = [word.strip() for word in content.split()]
+
+
 
     def get_next_possible_moves(self, coordinate: Coordinate):
         """
@@ -95,3 +104,6 @@ class BoggleBoard:
 
     def get_submitted_words(self):
         return self.__submitted_words
+
+
+board = BoggleBoard()
