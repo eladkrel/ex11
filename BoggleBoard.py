@@ -1,6 +1,6 @@
 from boggle_board_randomizer import randomize_board
 import ex11_utils
-from typing import List, Tuple
+from typing import List, Tuple, Set
 from copy import deepcopy
 
 Board = List[List[str]]
@@ -20,18 +20,17 @@ class BoggleBoard:
         self.__board = randomize_board()
         self.__load_game_words()
         self.__max_score_paths = ex11_utils.max_score_paths(self.__board,
-                                                            self.__words)   # CHECK IF NEEDED
+                                                            self.__words)
         self.__paths = []
         self.__submitted_words = []
         self.__score = 0
         self.__current_path = []
+        self.__hit_max_score = False
 
-    def __load_game_words(self):
+    def __load_game_words(self) -> None:
         """
         Function loads all the game words from boggle_dict.txt
         """
-        # with open(WORDS_PATH, "r") as f:
-        #     self.__words = f.read()
 
         # Open the file and read its contents
         with open(WORDS_PATH, "r") as file:
@@ -40,12 +39,8 @@ class BoggleBoard:
         # Split the contents into individual words and remove whitespace
         self.__words = [word for word in content.split()]
 
-        # self.__words = [word.strip() for word in content.split()]  # NEEDED?
-
-
-
-
-    def get_next_possible_moves(self, coordinate: Coordinate):
+    def get_next_possible_moves(self, coordinate: Coordinate) \
+            -> Set[Coordinate]:
         """
         Function receives a coordinate of a button on the board and changes
         that all the buttons next to it are gray and enabled and the other
@@ -62,7 +57,14 @@ class BoggleBoard:
                     next_possible_moves.add((r, c))
         return next_possible_moves
 
-    def add_submitted_word(self, path=None) -> bool: # NEED TO UNDERSTAND
+    def add_submitted_word(self, path=None) -> bool:
+        """
+        Function receives a path that has been submitted and adds the word
+        to the list of submitted word. Returns True if successful,
+        False otherwise.
+        :param path: A path to a word on the board
+        :return: True if addition successful, False otherwise.
+        """
         if path is None:
             path = self.__current_path
         self.__current_path = []
@@ -73,10 +75,12 @@ class BoggleBoard:
             self.__submitted_words.insert(0, word)
             self.__paths.append(path)
             self.__update_score()
+            if self.__max_score_paths == self.__paths:
+                self.__hit_max_score = True
             return True
         return False
 
-    def get_board_copy(self) -> Board:  # WHY COPY?
+    def get_board_copy(self) -> Board:
         """Returns a copy of the game board"""
         return deepcopy(self.__board)
 
@@ -89,7 +93,7 @@ class BoggleBoard:
             score += len(path) ** 2
         self.__score = score
 
-    def get_score(self):
+    def get_score(self) -> int:
         """Returns the game score"""
         return self.__score
 
@@ -106,8 +110,6 @@ class BoggleBoard:
         else:
             return False
 
-    def get_submitted_words(self):
+    def get_submitted_words(self) -> List[str]:
+        """Return the submitted words in the game"""
         return self.__submitted_words
-
-
-board = BoggleBoard()
