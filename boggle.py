@@ -217,6 +217,7 @@ class BoggleGUI:
                 button.config(state=tk.NORMAL, bg="white")
 
     def __update_word_list(self) -> None:
+        """Function adjusts the listbox to display all the found words"""
         self.__word_listbox.delete(0, tk.END)
         for word in self.__boggle_board.get_submitted_words():
             self.__word_listbox.insert(tk.END, word)
