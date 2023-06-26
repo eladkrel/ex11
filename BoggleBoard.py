@@ -72,8 +72,6 @@ class BoggleBoard:
             self.__submitted_words.insert(0, word)
             self.__paths.append(path)
             self.__update_score()
-            if set(self.__max_score_paths) == set(self.__paths):
-                self.__hit_max_score = True
             return True
         return False
 
