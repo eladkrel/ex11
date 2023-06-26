@@ -4,7 +4,7 @@ from pygame import mixer
 from BoggleBoard import *
 import random
 
-GAME_TIME = 20  # 3 minutes in seconds
+GAME_TIME = 180  # 3 minutes in seconds
 FONT = 'Bell MT'
 LOBBY_BEFORE_START_PATH = 'sounds/lobby_before_start.mp3'
 GAME_PLAY_PATH = 'sounds/game_play.mp3'
