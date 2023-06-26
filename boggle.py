@@ -5,7 +5,7 @@ from BoggleBoard import *
 import random
 
 GAME_TIME = 180  # 3 minutes in seconds
-FONT = 'Bell MT'
+FONT = 'Century Gothic'
 LOBBY_BEFORE_START_PATH = 'sounds/lobby_before_start.mp3'
 GAME_PLAY_PATH = 'sounds/game_play.mp3'
 POP_PATH = 'sounds/pop.mp3'
@@ -72,8 +72,8 @@ class BoggleGUI:
                                         image=self.__start_pic)
         self.__start_button.pack(pady=200, padx=30, side=tk.TOP)
 
-        self.__timer_label = tk.Label(self.__root, text="", font=(FONT, 16),
-                                      bg=BG_COLOR)
+        self.__timer_label = tk.Label(self.__root, text="",
+                                      font=(FONT, 16, "bold"), bg=BG_COLOR)
         self.__timer_label.pack()
         mixer.Channel(0).play(mixer.Sound(LOBBY_BEFORE_START_PATH), loops=-1)
 
@@ -106,7 +106,7 @@ class BoggleGUI:
         self.__board_buttons = []
         board = self.__boggle_board.get_board_copy()
         self.__buttons_from_letters(board)
-        self.__word_entry = tk.Entry(self.__root, font=(FONT, 12))
+        self.__word_entry = tk.Entry(self.__root, font=(FONT, 12, "bold"))
         self.__word_entry.pack()
         self.__word_entry.bind('<KeyPress>', lambda x: 'break')
         self.__submit_button = tk.Button(self.__root, image=self.__submit_pic,
@@ -122,7 +122,7 @@ class BoggleGUI:
                                              bg=BG_COLOR)
         self.__invalid_word_label.pack()
         self.__score_label = tk.Label(self.__root, text="Score: 0",
-                                      font=(FONT, 16), bg=BG_COLOR)
+                                      font=(FONT, 16, "bold"), bg=BG_COLOR)
         self.__score_label.pack()
         self.__start_time = time.time()
         self.__update_timer()
@@ -248,13 +248,13 @@ class BoggleGUI:
         end_frame.pack()
         end_text = self.__get_end_text()
         self.__end_label = tk.Label(end_frame, text=end_text,
-                                    font=(FONT, 16), bg=BG_COLOR)
+                                    font=(FONT, 14), bg=BG_COLOR)
         self.__end_label.grid(row=0, column=0, columnspan=2)
-        self.__y_button = tk.Button(end_frame, text='Yes!', font=(FONT, 20),
-                                    command=self.__start_over, bg=BG_COLOR)
+        self.__y_button = tk.Button(end_frame, text='Yes!', font=(FONT, 16),
+                                    command=self.__start_over, bg='cyan')
         self.__y_button.grid(row=1, column=0)
-        self.__n_button = tk.Button(end_frame, text='Nope', font=(FONT, 20),
-                                    command=self.__exit_game, bg=BG_COLOR)
+        self.__n_button = tk.Button(end_frame, text='Nope', font=(FONT, 16),
+                                    command=self.__exit_game, bg='cyan')
         self.__n_button.grid(row=1, column=1)
 
         mixer.Channel(0).stop()
