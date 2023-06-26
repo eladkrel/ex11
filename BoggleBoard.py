@@ -57,16 +57,13 @@ class BoggleBoard:
                     next_possible_moves.add((r, c))
         return next_possible_moves
 
-    def add_submitted_word(self, path=None) -> bool:
+    def add_submitted_word(self, ) -> bool:
         """
-        Function receives a path that has been submitted and adds the word
-        to the list of submitted word. Returns True if successful,
-        False otherwise.
-        :param path: A path to a word on the board
+        Function adds a word that has been submitted and from the
+        self.__current_path. Returns True if successful, False otherwise.
         :return: True if addition successful, False otherwise.
         """
-        if path is None:
-            path = self.__current_path
+        path = self.__current_path
         self.__current_path = []
         if not ex11_utils.is_valid_path(self.__board, path, self.__words):
             return False
@@ -75,7 +72,7 @@ class BoggleBoard:
             self.__submitted_words.insert(0, word)
             self.__paths.append(path)
             self.__update_score()
-            if self.__max_score_paths == self.__paths:
+            if set(self.__max_score_paths) == set(self.__paths):
                 self.__hit_max_score = True
             return True
         return False
@@ -113,3 +110,8 @@ class BoggleBoard:
     def get_submitted_words(self) -> List[str]:
         """Return the submitted words in the game"""
         return self.__submitted_words
+
+    def is_max_score(self):
+        """Function returns True if the game has reached the max score,
+        False otherwise."""
+        return self.__hit_max_score
