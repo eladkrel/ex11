@@ -249,7 +249,7 @@ class BoggleGUI:
         self.__end_label = tk.Label(end_frame, text=end_text,
                                     font=(FONT, 16), bg=BG_COLOR)
         self.__end_label.grid(row=0, column=0, columnspan=2)
-        self.__y_button = tk.Button(end_frame, text='Yes!!', font=(FONT, 20),
+        self.__y_button = tk.Button(end_frame, text='Yes!', font=(FONT, 20),
                                     command=self.__start_over, bg=BG_COLOR)
         self.__y_button.grid(row=1, column=0)
         self.__n_button = tk.Button(end_frame, text='Nope', font=(FONT, 20),
