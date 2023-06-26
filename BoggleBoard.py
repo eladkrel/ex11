@@ -13,6 +13,7 @@ WORDS_PATH = "boggle_dict.txt"
 
 
 class BoggleBoard:
+    """The Boggle board class that handles the game board logic"""
     def __init__(self):
         """
         Initialize the Boggle Board
@@ -113,7 +114,7 @@ class BoggleBoard:
         """Return the submitted words in the game"""
         return self.__submitted_words
 
-    def is_max_score(self):
+    def is_max_score(self) -> bool:
         """Function returns True if the game has reached the max score,
         False otherwise."""
         return self.__hit_max_score
@@ -132,7 +133,7 @@ class BoggleBoard:
             all_words.add(ex11_utils.build_word(path, self.__board))
         return all_words
 
-    def is_found_all_words(self):
+    def is_found_all_words(self) -> bool:
         """Function returns True if all the words on the board have been
         found."""
         return self.__found_all_words

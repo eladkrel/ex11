@@ -34,6 +34,8 @@ TIMES_UP = "Time's up! Play another game?"
 
 
 class BoggleGUI:
+    """The Boggle GUI class that handles the GUI of the boggle game and runs
+    the game."""
     def __init__(self, boggle_board: BoggleBoard):
         """Init for the board GUI"""
         self.__root = tk.Tk()
