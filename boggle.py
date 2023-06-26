@@ -57,7 +57,6 @@ class BoggleGUI:
         self.__invalid_word_label = None
         self.__submitted_words = []
         self.__clicked_buttons = set()
-        self.__next_possible_buttons = set()
         mixer.init()
         self.__create_widgets()
         self.__root.mainloop()
@@ -175,14 +174,12 @@ class BoggleGUI:
         are white and disabled.
         :param coordinate: coordinate indexes
         """
-        self.__next_possible_buttons = set()
         next_moves = self.__boggle_board.get_next_possible_moves(coordinate)
         for r in range(len(self.__board_buttons)):
             for c in range(len(self.__board_buttons[0])):
                 button = self.__board_buttons[r][c]
                 if button not in self.__clicked_buttons:
                     if (r, c) in next_moves:
-                        self.__next_possible_buttons.add(button)
                         button.config(state=tk.NORMAL, bg="gray")
                     else:
                         button.config(state=tk.DISABLED, bg="white")
