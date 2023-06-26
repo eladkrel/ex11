@@ -4,7 +4,7 @@ from pygame import mixer
 from BoggleBoard import *
 import random
 
-GAME_TIME = 180  # 3 minutes in seconds
+GAME_TIME = 20  # 3 minutes in seconds
 FONT = 'Bell MT'
 LOBBY_BEFORE_START_PATH = 'sounds/lobby_before_start.mp3'
 GAME_PLAY_PATH = 'sounds/game_play.mp3'
@@ -15,6 +15,8 @@ INCORRECT_SOUND_PATH = 'sounds/submit_incorrect_word.mp3'
 START_GAME_PATH = './start_game_button.png'
 SUBMIT_BUTTON_PATH = './submit_1.png'
 BG_COLOR = 'light blue'
+MAX_SCORE_WIN = 'You Won! You got the max score!'
+FOUND_ALL_WORDS = 'You found all the words in the game!'
 INVALID_WORD = 'Invalid Word!'
 ICYTOWER_SOUNDS = ['sounds/icy_tower/aight.ogg',
                    'sounds/icy_tower/amazing.ogg',
@@ -200,6 +202,8 @@ class BoggleGUI:
             mixer.music.play()
             self.__score_label.config(text=f"Score: "
                                            f"{self.__boggle_board.get_score()}")
+            if self.__boggle_board.is_max_score():
+                self.__end_game()
         else:
             # word is no good
             self.__invalid_word_label.config(text=INVALID_WORD)
@@ -241,7 +245,8 @@ class BoggleGUI:
         self.__submit_button.destroy()
         end_frame = tk.Frame(self.__root, bg=BG_COLOR)
         end_frame.pack()
-        self.__end_label = tk.Label(end_frame, text=TIMES_UP,
+        end_text = self.__get_end_text()
+        self.__end_label = tk.Label(end_frame, text=end_text,
                                     font=(FONT, 16), bg=BG_COLOR)
         self.__end_label.grid(row=0, column=0, columnspan=2)
         self.__y_button = tk.Button(end_frame, text='Yes!!', font=(FONT, 20),
@@ -254,6 +259,14 @@ class BoggleGUI:
         mixer.Channel(0).stop()
         mixer.music.load(END_GAME_PATH)
         mixer.music.play()
+
+    def __get_end_text(self):
+        if self.__boggle_board.is_max_score():
+            return MAX_SCORE_WIN
+        elif self.__boggle_board.is_found_all_words():
+            return FOUND_ALL_WORDS
+        else:
+            return TIMES_UP
 
 
 if __name__ == "__main__":

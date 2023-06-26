@@ -284,3 +284,15 @@ def build_word(path: Path, board: Board) -> str:
         row, col = coordinate
         word += board[row][col]
     return word
+
+
+def get_score(paths: List[Path]) -> int:
+    """
+    Function receives a path and returns the score of the path
+    :param paths: A
+    :return:
+    """
+    score = 0
+    for path in paths:
+        score += len(path) ** 2
+    return score

@@ -21,11 +21,14 @@ class BoggleBoard:
         self.__load_game_words()
         self.__max_score_paths = ex11_utils.max_score_paths(self.__board,
                                                             self.__words)
+        self.__max_score = ex11_utils.get_score(self.__max_score_paths)
+        self.__all_board_words = self.__get_all_words()
         self.__paths = []
         self.__submitted_words = []
         self.__score = 0
         self.__current_path = []
         self.__hit_max_score = False
+        self.__found_all_words = False
 
     def __load_game_words(self) -> None:
         """
@@ -72,6 +75,10 @@ class BoggleBoard:
             self.__submitted_words.insert(0, word)
             self.__paths.append(path)
             self.__update_score()
+            if self.__score == self.__max_score:
+                self.__hit_max_score = True
+            if self.__get_all_words(self.__paths) == self.__all_board_words:
+                self.__found_all_words = True
             return True
         return False
 
@@ -83,10 +90,7 @@ class BoggleBoard:
         """
         Function updates the game score.
         """
-        score = 0
-        for path in self.__paths:
-            score += len(path) ** 2
-        self.__score = score
+        self.__score = ex11_utils.get_score(self.__paths)
 
     def get_score(self) -> int:
         """Returns the game score"""
@@ -113,3 +117,22 @@ class BoggleBoard:
         """Function returns True if the game has reached the max score,
         False otherwise."""
         return self.__hit_max_score
+
+    def __get_all_words(self, paths=None) -> Set[str]:
+        """
+        Function returns a set of all the built words from the paths on the
+        board. If no path is given, the self.__max_score_paths is used.
+        :param paths: a list of paths on the board
+        :return: A set of all the words
+        """
+        all_words = set()
+        if not paths:
+            paths = self.__max_score_paths
+        for path in paths:
+            all_words.add(ex11_utils.build_word(path, self.__board))
+        return all_words
+
+    def is_found_all_words(self):
+        """Function returns True if all the words on the board have been
+        found."""
+        return self.__found_all_words
