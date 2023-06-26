@@ -260,7 +260,8 @@ class BoggleGUI:
         mixer.music.load(END_GAME_PATH)
         mixer.music.play()
 
-    def __get_end_text(self):
+    def __get_end_text(self) -> None:
+        """Function returns what end message to display when the game ends."""
         if self.__boggle_board.is_max_score():
             return MAX_SCORE_WIN
         elif self.__boggle_board.is_found_all_words():
